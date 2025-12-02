@@ -4,7 +4,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Introduction from './pages/Introduction';
 import Contract from './pages/Contract';
-import StudentIntroductions from './components/StudentIntroductions'; // NEW IMPORT
+import StudentIntroductions from './components/StudentIntroductions/StudentIntroductions';
 import './index.css';
 
 function App() {
