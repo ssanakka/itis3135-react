@@ -13,7 +13,7 @@ const StudentIntroductions = () => {
     const [filters, setFilters] = useState({
         name: true,
         mascot: true,
-        image: false,
+        image: true, // Default to true since images are available
         personalStatement: true,
         backgrounds: true,
         classes: true,
@@ -34,16 +34,8 @@ const StudentIntroductions = () => {
                 }
                 
                 const data = await response.json();
-                // Add mock image URLs since the API doesn't provide real images
-                const studentsWithImages = data.map((student, index) => ({
-                    ...student,
-                    // Mock image URL - in a real app, this would come from the API
-                    image: `https://i.pravatar.cc/150?img=${index + 1}`,
-                    // Alternative: use placeholder image
-                    // image: 'https://via.placeholder.com/150'
-                }));
-                setStudents(studentsWithImages);
-                setFilteredStudents(studentsWithImages);
+                setStudents(data);
+                setFilteredStudents(data);
                 setLoading(false);
             } catch (err) {
                 setError(err.message);
@@ -117,7 +109,7 @@ const StudentIntroductions = () => {
         setFilters({
             name: true,
             mascot: true,
-            image: false,
+            image: true,
             personalStatement: true,
             backgrounds: true,
             classes: true,
@@ -139,6 +131,19 @@ const StudentIntroductions = () => {
 
     const getMascot = (student) => {
         return student.mascot || '';
+    };
+
+    // Function to get full image URL
+    const getImageUrl = (student) => {
+        if (student.image) {
+            // Check if it's already a full URL
+            if (student.image.startsWith('http')) {
+                return student.image;
+            }
+            // Prepend the base URL to the relative path
+            return `https://dvonb.xyz${student.image}`;
+        }
+        return null;
     };
 
     // Function to get initials for avatar fallback
@@ -194,6 +199,7 @@ const StudentIntroductions = () => {
     }
 
     const currentStudent = filteredStudents[currentStudentIndex];
+    const imageUrl = getImageUrl(currentStudent);
 
     return (
         <div className="student-introductions">
@@ -253,10 +259,10 @@ const StudentIntroductions = () => {
                         <div className="student-card slideshow-item">
                             <div className="student-header">
                                 {/* Image Section */}
-                                {filters.image && (
+                                {filters.image && imageUrl && (
                                     <div className="student-image-container">
                                         <img
-                                            src={currentStudent.image}
+                                            src={imageUrl}
                                             alt={`${getDisplayName(currentStudent)}`}
                                             className="student-image"
                                             onError={handleImageError}
@@ -264,9 +270,6 @@ const StudentIntroductions = () => {
                                         <div className="student-initials">
                                             {getInitials(currentStudent)}
                                         </div>
-                                        <p className="image-note">
-                                            <em>Note: Images are placeholders as the API doesn't provide real images</em>
-                                        </p>
                                     </div>
                                 )}
                                 
@@ -285,40 +288,49 @@ const StudentIntroductions = () => {
                                             {getMascot(currentStudent)}
                                         </div>
                                     )}
+                                    
+                                    {/* Email always shown */}
+                                    <p className="student-email">
+                                        <strong>Email:</strong> {currentStudent.prefix}@charlotte.edu
+                                    </p>
                                 </div>
                             </div>
 
                             <div className="student-details">
-                                {/* Contact Information - Always shown */}
-                                <div className="detail-group">
-                                    <h4>Contact Information</h4>
-                                    <p><strong>Email:</strong> {currentStudent.prefix}@charlotte.edu</p>
-                                    {currentStudent.links?.charlotte && (
+                                {/* Contact Information - Links only, email moved to header */}
+                                {currentStudent.links?.charlotte && (
+                                    <div className="detail-group">
+                                        <h4>Website</h4>
                                         <p>
-                                            <strong>Website:</strong>{' '}
                                             <a href={currentStudent.links.charlotte} target="_blank" rel="noopener noreferrer">
                                                 {currentStudent.links.charlotte}
                                             </a>
                                         </p>
-                                    )}
-                                </div>
+                                    </div>
+                                )}
 
                                 {filters.backgrounds && (
                                     <>
-                                        <div className="detail-group">
-                                            <h4>Academic Background</h4>
-                                            <p>{currentStudent.backgrounds?.academic || 'Not specified'}</p>
-                                        </div>
+                                        {currentStudent.backgrounds?.academic && (
+                                            <div className="detail-group">
+                                                <h4>Academic Background</h4>
+                                                <p>{currentStudent.backgrounds.academic}</p>
+                                            </div>
+                                        )}
 
-                                        <div className="detail-group">
-                                            <h4>Professional Background</h4>
-                                            <p>{currentStudent.backgrounds?.professional || 'Not specified'}</p>
-                                        </div>
+                                        {currentStudent.backgrounds?.professional && (
+                                            <div className="detail-group">
+                                                <h4>Professional Background</h4>
+                                                <p>{currentStudent.backgrounds.professional}</p>
+                                            </div>
+                                        )}
 
-                                        <div className="detail-group">
-                                            <h4>Personal Background</h4>
-                                            <p>{currentStudent.backgrounds?.personal || 'Not specified'}</p>
-                                        </div>
+                                        {currentStudent.backgrounds?.personal && (
+                                            <div className="detail-group">
+                                                <h4>Personal Background</h4>
+                                                <p>{currentStudent.backgrounds.personal}</p>
+                                            </div>
+                                        )}
                                     </>
                                 )}
 
@@ -371,21 +383,25 @@ const StudentIntroductions = () => {
                             )}
 
                             {/* Links Section */}
-                            {filters.links && currentStudent.links && (
+                            {filters.links && currentStudent.links && Object.keys(currentStudent.links).length > 0 && (
                                 <div className="links-section">
                                     <h4>Links</h4>
                                     <div className="links-grid">
-                                        {Object.entries(currentStudent.links).map(([key, value]) => (
-                                            <a
-                                                key={key}
-                                                href={value}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="link-item"
-                                            >
-                                                {key.charAt(0).toUpperCase() + key.slice(1)}
-                                            </a>
-                                        ))}
+                                        {Object.entries(currentStudent.links).map(([key, value]) => {
+                                            // Skip charlotte link since it's shown above
+                                            if (key === 'charlotte') return null;
+                                            return (
+                                                <a
+                                                    key={key}
+                                                    href={value}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="link-item"
+                                                >
+                                                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                                                </a>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
