@@ -81,6 +81,22 @@ const StudentIntroductions = () => {
         );
     }
 
+    // Helper function to get student display name
+    const getDisplayName = (student) => {
+        const name = student.name;
+        return `${name.first} ${name.last}`;
+    };
+
+    // Helper function to get preferred name if available
+    const getPreferredName = (student) => {
+        return student.name.preferred || '';
+    };
+
+    // Helper function to get mascot
+    const getMascot = (student) => {
+        return student.mascot || '';
+    };
+
     return (
         <div className="student-introductions">
             <header className="page-header">
@@ -93,25 +109,25 @@ const StudentIntroductions = () => {
             <div className="student-card">
                 <div className="student-header">
                     <h2>
-                        {currentStudent.firstName} {currentStudent.lastName}
-                        {currentStudent.preferredName && (
-                            <span className="preferred-name"> "{currentStudent.preferredName}"</span>
+                        {getDisplayName(currentStudent)}
+                        {getPreferredName(currentStudent) && (
+                            <span className="preferred-name"> "{getPreferredName(currentStudent)}"</span>
                         )}
                     </h2>
                     <div className="student-mascot">
-                        {currentStudent.mascotAdjective} {currentStudent.mascotAnimal}
+                        {getMascot(currentStudent)}
                     </div>
                 </div>
 
                 <div className="student-details">
                     <div className="detail-group">
                         <h4>Contact Information</h4>
-                        <p><strong>Email:</strong> {currentStudent.email}</p>
-                        {currentStudent.website && (
+                        <p><strong>Email:</strong> {currentStudent.prefix}@charlotte.edu</p>
+                        {currentStudent.links?.charlotte && (
                             <p>
                                 <strong>Website:</strong>{' '}
-                                <a href={currentStudent.website} target="_blank" rel="noopener noreferrer">
-                                    {currentStudent.website}
+                                <a href={currentStudent.links.charlotte} target="_blank" rel="noopener noreferrer">
+                                    {currentStudent.links.charlotte}
                                 </a>
                             </p>
                         )}
@@ -119,30 +135,47 @@ const StudentIntroductions = () => {
 
                     <div className="detail-group">
                         <h4>Academic Background</h4>
-                        <p>{currentStudent.academicBackground || 'Not specified'}</p>
+                        <p>{currentStudent.backgrounds?.academic || 'Not specified'}</p>
                     </div>
 
                     <div className="detail-group">
                         <h4>Professional Background</h4>
-                        <p>{currentStudent.professionalBackground || 'Not specified'}</p>
+                        <p>{currentStudent.backgrounds?.professional || 'Not specified'}</p>
                     </div>
 
                     <div className="detail-group">
                         <h4>Personal Background</h4>
-                        <p>{currentStudent.personalBackground || 'Not specified'}</p>
+                        <p>{currentStudent.backgrounds?.personal || 'Not specified'}</p>
                     </div>
 
-                    {currentStudent.primaryComputer && (
+                    {currentStudent.platform?.device && (
                         <div className="detail-group">
                             <h4>Primary Computer</h4>
-                            <p>{currentStudent.primaryComputer}</p>
+                            <p>{currentStudent.platform.device} ({currentStudent.platform.os})</p>
                         </div>
                     )}
 
-                    {currentStudent.funnyThing && (
+                    {currentStudent.funFact && (
                         <div className="detail-group">
-                            <h4>Funny Thing</h4>
-                            <p>{currentStudent.funnyThing}</p>
+                            <h4>Fun Fact</h4>
+                            <p>{currentStudent.funFact}</p>
+                        </div>
+                    )}
+
+                    {currentStudent.personalStatement && (
+                        <div className="detail-group">
+                            <h4>Personal Statement</h4>
+                            <p>{currentStudent.personalStatement}</p>
+                        </div>
+                    )}
+
+                    {currentStudent.quote?.text && (
+                        <div className="detail-group">
+                            <h4>Favorite Quote</h4>
+                            <p>"{currentStudent.quote.text}"</p>
+                            {currentStudent.quote.author && (
+                                <p className="quote-author">- {currentStudent.quote.author}</p>
+                            )}
                         </div>
                     )}
                 </div>
@@ -154,7 +187,7 @@ const StudentIntroductions = () => {
                         <div className="courses-grid">
                             {currentStudent.courses.map((course, index) => (
                                 <div key={index} className="course-card">
-                                    <h5>{course.department} {course.number}</h5>
+                                    <h5>{course.dept} {course.num}</h5>
                                     <p className="course-name">{course.name}</p>
                                     <p className="course-reason">{course.reason}</p>
                                 </div>
@@ -164,19 +197,19 @@ const StudentIntroductions = () => {
                 )}
 
                 {/* Links Section */}
-                {currentStudent.links && currentStudent.links.length > 0 && (
+                {currentStudent.links && (
                     <div className="links-section">
                         <h4>Links</h4>
                         <div className="links-grid">
-                            {currentStudent.links.map((link, index) => (
+                            {Object.entries(currentStudent.links).map(([key, value]) => (
                                 <a
-                                    key={index}
-                                    href={link.href}
+                                    key={key}
+                                    href={value}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="link-item"
                                 >
-                                    {link.name}
+                                    {key.charAt(0).toUpperCase() + key.slice(1)}
                                 </a>
                             ))}
                         </div>
@@ -205,13 +238,13 @@ const StudentIntroductions = () => {
                 <div className="student-list">
                     {students.map((student, index) => (
                         <button
-                            key={student.email || index}
+                            key={student.prefix || index}
                             onClick={() => setCurrentStudentIndex(index)}
                             className={`student-list-item ${
                                 index === currentStudentIndex ? 'active' : ''
                             }`}
                         >
-                            {student.firstName} {student.lastName}
+                            {getDisplayName(student)}
                         </button>
                     ))}
                 </div>
