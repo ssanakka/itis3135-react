@@ -71,7 +71,7 @@ const StudentIntroductions = () => {
         student.mascotAnimal?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const currentStudent = filteredStudents[currentStudentIndex];
+    const currentStudent = students[currentStudentIndex];
 
     if (loading) {
         return (
