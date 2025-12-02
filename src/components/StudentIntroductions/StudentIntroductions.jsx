@@ -6,9 +6,8 @@ const StudentIntroductions = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
-    const [searchTerm, setSearchTerm] = useState('');
 
-    // Fetch all students data
+    // Fetch Fall 2025 students data
     useEffect(() => {
         const fetchStudents = async () => {
             try {
@@ -16,16 +15,13 @@ const StudentIntroductions = () => {
                 const response = await fetch('https://dvonb.xyz/api/2025-fall/itis-3135/students?full=1');
                 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch student data');
+                    throw new Error(`HTTP ${response.status}: Failed to fetch student data`);
                 }
                 
                 const data = await response.json();
-                console.log('API response:', data); // Debug log
-                console.log('Number of students:', data.length); // Debug log
                 setStudents(data);
                 setLoading(false);
             } catch (err) {
-                console.error('Error:', err);
                 setError(err.message);
                 setLoading(false);
             }
@@ -73,14 +69,13 @@ const StudentIntroductions = () => {
             <div className="student-introductions">
                 <header className="page-header">
                     <h1>Class Introductions</h1>
-                    <p>Meet your ITIS 3135 classmates for Fall 2025</p>
+                    <p>ITIS 3135 - Fall 2025</p>
                 </header>
                 
                 <div className="no-students">
-                    <h3>⚠️ No Student Data Available</h3>
-                    <p>The API returned an empty array. Check console for details.</p>
-                    <p><strong>API Endpoint:</strong> https://dvonb.xyz/api/2025-fall/itis-3135/students?full=1</p>
-                    <button onClick={() => window.location.reload()}>Refresh Page</button>
+                    <h3>No student data available</h3>
+                    <p>The API returned an empty response.</p>
+                    <p><strong>Endpoint:</strong> https://dvonb.xyz/api/2025-fall/itis-3135/students?full=1</p>
                 </div>
             </div>
         );
@@ -90,7 +85,7 @@ const StudentIntroductions = () => {
         <div className="student-introductions">
             <header className="page-header">
                 <h1>Class Introductions</h1>
-                <p>Meet your ITIS 3135 classmates for Fall 2025</p>
+                <p>ITIS 3135 - Fall 2025</p>
                 <p className="total-students">Total Students: {students.length}</p>
             </header>
 
