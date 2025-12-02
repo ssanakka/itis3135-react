@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Introduction from './pages/Introduction';
 import Contract from './pages/Contract';
+import StudentIntroductions from './pages/StudentIntroductions'; // NEW IMPORT
 import './index.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/introduction" element={<Introduction />} />
                         <Route path="/contract" element={<Contract />} />
+                        <Route path="/student-introductions" element={<StudentIntroductions />} /> {/* NEW ROUTE */}
                     </Routes>
                 </main>
                 <Footer />
