@@ -7,41 +7,26 @@ const StudentIntroductions = () => {
     const [error, setError] = useState(null);
     const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
-    const [apiEmpty, setApiEmpty] = useState(false);
 
     // Fetch all students data
     useEffect(() => {
         const fetchStudents = async () => {
             try {
                 setLoading(true);
-                console.log('Fetching from API...');
-                
-                // Try the API endpoint
                 const response = await fetch('https://dvonb.xyz/api/2025-fall/itis-3135/students?full=1');
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error('Failed to fetch student data');
                 }
                 
                 const data = await response.json();
-                console.log('API Response:', data);
-                
-                if (data && Array.isArray(data) && data.length > 0) {
-                    setStudents(data);
-                    setApiEmpty(false);
-                    console.log(`Loaded ${data.length} students from API`);
-                } else {
-                    // API returned empty array
-                    setApiEmpty(true);
-                    setStudents([]);
-                    console.log('API returned empty array');
-                }
-                
+                console.log('API response:', data); // Debug log
+                console.log('Number of students:', data.length); // Debug log
+                setStudents(data);
                 setLoading(false);
             } catch (err) {
-                console.error('Fetch error:', err);
+                console.error('Error:', err);
                 setError(err.message);
-                setApiEmpty(true);
                 setLoading(false);
             }
         };
@@ -61,15 +46,6 @@ const StudentIntroductions = () => {
             prevIndex === 0 ? students.length - 1 : prevIndex - 1
         );
     };
-
-    // Filter students based on search term
-    const filteredStudents = students.filter(student =>
-        student.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.mascotAdjective?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.mascotAnimal?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
     const currentStudent = students[currentStudentIndex];
 
@@ -92,7 +68,7 @@ const StudentIntroductions = () => {
         );
     }
 
-    if (apiEmpty) {
+    if (students.length === 0) {
         return (
             <div className="student-introductions">
                 <header className="page-header">
@@ -100,26 +76,11 @@ const StudentIntroductions = () => {
                     <p>Meet your ITIS 3135 classmates for Fall 2025</p>
                 </header>
                 
-                <div className="api-empty-message">
-                    <h3>⚠️ No Student Data Available Yet</h3>
-                    <p>The class introduction database is currently empty.</p>
-                    
-                    <div className="instructions">
-                        <h4>To add your introduction:</h4>
-                        <ol>
-                            <li>Go to the <a href="https://dvonb.xyz/students/" target="_blank" rel="noopener noreferrer">Introduction Form</a></li>
-                            <li>Submit your introduction information</li>
-                            <li>Once submitted, your data will appear here</li>
-                            <li>Refresh this page to see updates</li>
-                        </ol>
-                    </div>
-                    
-                    <div className="api-info">
-                        <h4>API Status:</h4>
-                        <p><strong>Endpoint:</strong> https://dvonb.xyz/api/2025-fall/itis-3135/students?full=1</p>
-                        <p><strong>Response:</strong> Empty array (no students have submitted yet)</p>
-                        <p><strong>Check your submission:</strong> <a href="https://dvonb.xyz/students/" target="_blank" rel="noopener noreferrer">View all students</a></p>
-                    </div>
+                <div className="no-students">
+                    <h3>⚠️ No Student Data Available</h3>
+                    <p>The API returned an empty array. Check console for details.</p>
+                    <p><strong>API Endpoint:</strong> https://dvonb.xyz/api/2025-fall/itis-3135/students?full=1</p>
+                    <button onClick={() => window.location.reload()}>Refresh Page</button>
                 </div>
             </div>
         );
@@ -130,161 +91,136 @@ const StudentIntroductions = () => {
             <header className="page-header">
                 <h1>Class Introductions</h1>
                 <p>Meet your ITIS 3135 classmates for Fall 2025</p>
+                <p className="total-students">Total Students: {students.length}</p>
             </header>
 
-            {/* Search Bar */}
-            <div className="search-container">
-                <input
-                    type="text"
-                    placeholder="Search by name, email, or mascot..."
-                    value={searchTerm}
-                    onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setCurrentStudentIndex(0);
-                    }}
-                    className="search-input"
-                />
-                <span className="student-count">
-                    Showing {filteredStudents.length} of {students.length} students
-                </span>
-            </div>
-
-            {filteredStudents.length === 0 ? (
-                <div className="no-results">
-                    <h3>No students found matching your search.</h3>
-                    <p>Try adjusting your search terms.</p>
+            {/* Single Student View */}
+            <div className="student-card">
+                <div className="student-header">
+                    <h2>
+                        {currentStudent.firstName} {currentStudent.lastName}
+                        {currentStudent.preferredName && (
+                            <span className="preferred-name"> "{currentStudent.preferredName}"</span>
+                        )}
+                    </h2>
+                    <div className="student-mascot">
+                        {currentStudent.mascotAdjective} {currentStudent.mascotAnimal}
+                    </div>
                 </div>
-            ) : (
-                <>
-                    {/* Single Student View */}
-                    <div className="student-card">
-                        <div className="student-header">
-                            <h2>
-                                {currentStudent.firstName} {currentStudent.lastName}
-                                {currentStudent.preferredName && (
-                                    <span className="preferred-name"> "{currentStudent.preferredName}"</span>
-                                )}
-                            </h2>
-                            <div className="student-mascot">
-                                {currentStudent.mascotAdjective} {currentStudent.mascotAnimal}
-                            </div>
-                        </div>
 
-                        <div className="student-details">
-                            <div className="detail-group">
-                                <h4>Contact Information</h4>
-                                <p><strong>Email:</strong> {currentStudent.email}</p>
-                                {currentStudent.website && (
-                                    <p>
-                                        <strong>Website:</strong>{' '}
-                                        <a href={currentStudent.website} target="_blank" rel="noopener noreferrer">
-                                            {currentStudent.website}
-                                        </a>
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="detail-group">
-                                <h4>Academic Background</h4>
-                                <p>{currentStudent.academicBackground || 'Not specified'}</p>
-                            </div>
-
-                            <div className="detail-group">
-                                <h4>Professional Background</h4>
-                                <p>{currentStudent.professionalBackground || 'Not specified'}</p>
-                            </div>
-
-                            <div className="detail-group">
-                                <h4>Personal Background</h4>
-                                <p>{currentStudent.personalBackground || 'Not specified'}</p>
-                            </div>
-
-                            {currentStudent.primaryComputer && (
-                                <div className="detail-group">
-                                    <h4>Primary Computer</h4>
-                                    <p>{currentStudent.primaryComputer}</p>
-                                </div>
-                            )}
-
-                            {currentStudent.funnyThing && (
-                                <div className="detail-group">
-                                    <h4>Funny Thing</h4>
-                                    <p>{currentStudent.funnyThing}</p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Courses Section */}
-                        {currentStudent.courses && currentStudent.courses.length > 0 && (
-                            <div className="courses-section">
-                                <h4>Current Courses</h4>
-                                <div className="courses-grid">
-                                    {currentStudent.courses.map((course, index) => (
-                                        <div key={index} className="course-card">
-                                            <h5>{course.department} {course.number}</h5>
-                                            <p className="course-name">{course.name}</p>
-                                            <p className="course-reason">{course.reason}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Links Section */}
-                        {currentStudent.links && currentStudent.links.length > 0 && (
-                            <div className="links-section">
-                                <h4>Links</h4>
-                                <div className="links-grid">
-                                    {currentStudent.links.map((link, index) => (
-                                        <a
-                                            key={index}
-                                            href={link.href}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="link-item"
-                                        >
-                                            {link.name}
-                                        </a>
-                                    ))}
-                                </div>
-                            </div>
+                <div className="student-details">
+                    <div className="detail-group">
+                        <h4>Contact Information</h4>
+                        <p><strong>Email:</strong> {currentStudent.email}</p>
+                        {currentStudent.website && (
+                            <p>
+                                <strong>Website:</strong>{' '}
+                                <a href={currentStudent.website} target="_blank" rel="noopener noreferrer">
+                                    {currentStudent.website}
+                                </a>
+                            </p>
                         )}
                     </div>
 
-                    {/* Navigation Controls */}
-                    <div className="navigation-controls">
-                        <button onClick={prevStudent} className="nav-button">
-                            ← Previous
-                        </button>
-                        
-                        <span className="student-position">
-                            Student {currentStudentIndex + 1} of {filteredStudents.length}
-                        </span>
-                        
-                        <button onClick={nextStudent} className="nav-button">
-                            Next →
-                        </button>
+                    <div className="detail-group">
+                        <h4>Academic Background</h4>
+                        <p>{currentStudent.academicBackground || 'Not specified'}</p>
                     </div>
 
-                    {/* Quick Navigation */}
-                    <div className="quick-nav">
-                        <h4>Quick Navigation</h4>
-                        <div className="student-list">
-                            {filteredStudents.map((student, index) => (
-                                <button
-                                    key={student.email}
-                                    onClick={() => setCurrentStudentIndex(index)}
-                                    className={`student-list-item ${
-                                        index === currentStudentIndex ? 'active' : ''
-                                    }`}
-                                >
-                                    {student.firstName} {student.lastName}
-                                </button>
+                    <div className="detail-group">
+                        <h4>Professional Background</h4>
+                        <p>{currentStudent.professionalBackground || 'Not specified'}</p>
+                    </div>
+
+                    <div className="detail-group">
+                        <h4>Personal Background</h4>
+                        <p>{currentStudent.personalBackground || 'Not specified'}</p>
+                    </div>
+
+                    {currentStudent.primaryComputer && (
+                        <div className="detail-group">
+                            <h4>Primary Computer</h4>
+                            <p>{currentStudent.primaryComputer}</p>
+                        </div>
+                    )}
+
+                    {currentStudent.funnyThing && (
+                        <div className="detail-group">
+                            <h4>Funny Thing</h4>
+                            <p>{currentStudent.funnyThing}</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Courses Section */}
+                {currentStudent.courses && currentStudent.courses.length > 0 && (
+                    <div className="courses-section">
+                        <h4>Current Courses</h4>
+                        <div className="courses-grid">
+                            {currentStudent.courses.map((course, index) => (
+                                <div key={index} className="course-card">
+                                    <h5>{course.department} {course.number}</h5>
+                                    <p className="course-name">{course.name}</p>
+                                    <p className="course-reason">{course.reason}</p>
+                                </div>
                             ))}
                         </div>
                     </div>
-                </>
-            )}
+                )}
+
+                {/* Links Section */}
+                {currentStudent.links && currentStudent.links.length > 0 && (
+                    <div className="links-section">
+                        <h4>Links</h4>
+                        <div className="links-grid">
+                            {currentStudent.links.map((link, index) => (
+                                <a
+                                    key={index}
+                                    href={link.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="link-item"
+                                >
+                                    {link.name}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Navigation Controls */}
+            <div className="navigation-controls">
+                <button onClick={prevStudent} className="nav-button">
+                    ← Previous
+                </button>
+                
+                <span className="student-position">
+                    Student {currentStudentIndex + 1} of {students.length}
+                </span>
+                
+                <button onClick={nextStudent} className="nav-button">
+                    Next →
+                </button>
+            </div>
+
+            {/* Quick Navigation */}
+            <div className="quick-nav">
+                <h4>Quick Navigation</h4>
+                <div className="student-list">
+                    {students.map((student, index) => (
+                        <button
+                            key={student.email || index}
+                            onClick={() => setCurrentStudentIndex(index)}
+                            className={`student-list-item ${
+                                index === currentStudentIndex ? 'active' : ''
+                            }`}
+                        >
+                            {student.firstName} {student.lastName}
+                        </button>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 };
