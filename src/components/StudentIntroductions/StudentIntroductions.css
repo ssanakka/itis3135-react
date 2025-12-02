@@ -494,3 +494,86 @@
         text-align: center;
     }
 }
+
+
+
+/* Add these styles to your existing StudentIntroductions.css */
+
+/* Image Container */
+.student-image-container {
+    position: relative;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+.student-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #3498db;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.student-initials {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3498db, #2c3e50);
+    color: white;
+    font-size: 48px;
+    font-weight: bold;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid #3498db;
+}
+
+.image-note {
+    text-align: center;
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-top: 8px;
+    max-width: 150px;
+}
+
+/* Update student-header for image layout */
+.student-header {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.student-info {
+    flex: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .student-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .student-image-container {
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+    
+    .student-image {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .student-initials {
+        width: 120px;
+        height: 120px;
+        font-size: 36px;
+    }
+}

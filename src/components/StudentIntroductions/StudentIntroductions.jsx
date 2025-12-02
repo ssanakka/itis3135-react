@@ -34,8 +34,16 @@ const StudentIntroductions = () => {
                 }
                 
                 const data = await response.json();
-                setStudents(data);
-                setFilteredStudents(data);
+                // Add mock image URLs since the API doesn't provide real images
+                const studentsWithImages = data.map((student, index) => ({
+                    ...student,
+                    // Mock image URL - in a real app, this would come from the API
+                    image: `https://i.pravatar.cc/150?img=${index + 1}`,
+                    // Alternative: use placeholder image
+                    // image: 'https://via.placeholder.com/150'
+                }));
+                setStudents(studentsWithImages);
+                setFilteredStudents(studentsWithImages);
                 setLoading(false);
             } catch (err) {
                 setError(err.message);
@@ -133,6 +141,22 @@ const StudentIntroductions = () => {
         return student.mascot || '';
     };
 
+    // Function to get initials for avatar fallback
+    const getInitials = (student) => {
+        const first = student.name.first.charAt(0);
+        const last = student.name.last.charAt(0);
+        return `${first}${last}`.toUpperCase();
+    };
+
+    // Function to handle image loading errors
+    const handleImageError = (e) => {
+        e.target.style.display = 'none';
+        const initialsContainer = e.target.nextSibling;
+        if (initialsContainer) {
+            initialsContainer.style.display = 'flex';
+        }
+    };
+
     if (loading) {
         return (
             <div className="loading-container">
@@ -228,20 +252,40 @@ const StudentIntroductions = () => {
                         {/* Single Student View */}
                         <div className="student-card slideshow-item">
                             <div className="student-header">
-                                {filters.name && (
-                                    <h2>
-                                        {getDisplayName(currentStudent)}
-                                        {getPreferredName(currentStudent) && (
-                                            <span className="preferred-name"> "{getPreferredName(currentStudent)}"</span>
-                                        )}
-                                    </h2>
-                                )}
-                                
-                                {filters.mascot && getMascot(currentStudent) && (
-                                    <div className="student-mascot">
-                                        {getMascot(currentStudent)}
+                                {/* Image Section */}
+                                {filters.image && (
+                                    <div className="student-image-container">
+                                        <img
+                                            src={currentStudent.image}
+                                            alt={`${getDisplayName(currentStudent)}`}
+                                            className="student-image"
+                                            onError={handleImageError}
+                                        />
+                                        <div className="student-initials">
+                                            {getInitials(currentStudent)}
+                                        </div>
+                                        <p className="image-note">
+                                            <em>Note: Images are placeholders as the API doesn't provide real images</em>
+                                        </p>
                                     </div>
                                 )}
+                                
+                                <div className="student-info">
+                                    {filters.name && (
+                                        <h2>
+                                            {getDisplayName(currentStudent)}
+                                            {getPreferredName(currentStudent) && (
+                                                <span className="preferred-name"> "{getPreferredName(currentStudent)}"</span>
+                                            )}
+                                        </h2>
+                                    )}
+                                    
+                                    {filters.mascot && getMascot(currentStudent) && (
+                                        <div className="student-mascot">
+                                            {getMascot(currentStudent)}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="student-details">
