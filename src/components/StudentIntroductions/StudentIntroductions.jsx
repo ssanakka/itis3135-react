@@ -7,23 +7,41 @@ const StudentIntroductions = () => {
     const [error, setError] = useState(null);
     const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
+    const [apiEmpty, setApiEmpty] = useState(false);
 
     // Fetch all students data
     useEffect(() => {
         const fetchStudents = async () => {
             try {
                 setLoading(true);
+                console.log('Fetching from API...');
+                
+                // Try the API endpoint
                 const response = await fetch('https://dvonb.xyz/api/2025-fall/itis-3135/students?full=1');
                 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch student data');
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const data = await response.json();
-                setStudents(data);
+                console.log('API Response:', data);
+                
+                if (data && Array.isArray(data) && data.length > 0) {
+                    setStudents(data);
+                    setApiEmpty(false);
+                    console.log(`Loaded ${data.length} students from API`);
+                } else {
+                    // API returned empty array
+                    setApiEmpty(true);
+                    setStudents([]);
+                    console.log('API returned empty array');
+                }
+                
                 setLoading(false);
             } catch (err) {
+                console.error('Fetch error:', err);
                 setError(err.message);
+                setApiEmpty(true);
                 setLoading(false);
             }
         };
@@ -70,6 +88,39 @@ const StudentIntroductions = () => {
                 <h2>Error Loading Data</h2>
                 <p>{error}</p>
                 <p>Please try refreshing the page.</p>
+            </div>
+        );
+    }
+
+    if (apiEmpty) {
+        return (
+            <div className="student-introductions">
+                <header className="page-header">
+                    <h1>Class Introductions</h1>
+                    <p>Meet your ITIS 3135 classmates for Fall 2025</p>
+                </header>
+                
+                <div className="api-empty-message">
+                    <h3>⚠️ No Student Data Available Yet</h3>
+                    <p>The class introduction database is currently empty.</p>
+                    
+                    <div className="instructions">
+                        <h4>To add your introduction:</h4>
+                        <ol>
+                            <li>Go to the <a href="https://dvonb.xyz/students/" target="_blank" rel="noopener noreferrer">Introduction Form</a></li>
+                            <li>Submit your introduction information</li>
+                            <li>Once submitted, your data will appear here</li>
+                            <li>Refresh this page to see updates</li>
+                        </ol>
+                    </div>
+                    
+                    <div className="api-info">
+                        <h4>API Status:</h4>
+                        <p><strong>Endpoint:</strong> https://dvonb.xyz/api/2025-fall/itis-3135/students?full=1</p>
+                        <p><strong>Response:</strong> Empty array (no students have submitted yet)</p>
+                        <p><strong>Check your submission:</strong> <a href="https://dvonb.xyz/students/" target="_blank" rel="noopener noreferrer">View all students</a></p>
+                    </div>
+                </div>
             </div>
         );
     }
