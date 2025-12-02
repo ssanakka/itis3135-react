@@ -13,6 +13,8 @@ const Header = () => {
                     <li className="nav-item"><Link to="/introduction">Introduction</Link></li>
                     <li className="nav-item">|</li>
                     <li className="nav-item"><Link to="/contract">Contract</Link></li>
+                    <li className="nav-item">|</li>
+                    <li className="nav-item"><Link to="/student-introductions">Studnet Introductions</Link></li>
                 </ul>
             </nav>
         </header>
