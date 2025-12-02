@@ -13,7 +13,7 @@ const StudentIntroductions = () => {
     const [filters, setFilters] = useState({
         name: true,
         mascot: true,
-        image: true, // Default to true since images are available
+        image: true,
         personalStatement: true,
         backgrounds: true,
         classes: true,
@@ -34,6 +34,7 @@ const StudentIntroductions = () => {
                 }
                 
                 const data = await response.json();
+                console.log('Fetched students:', data); // Debug log
                 setStudents(data);
                 setFilteredStudents(data);
                 setLoading(false);
@@ -100,7 +101,7 @@ const StudentIntroductions = () => {
     // Search handler
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);
-        setCurrentStudentIndex(0); // Reset to first student when searching
+        setCurrentStudentIndex(0);
     };
 
     // Clear all filters
@@ -121,8 +122,7 @@ const StudentIntroductions = () => {
 
     // Helper functions
     const getDisplayName = (student) => {
-        const name = student.name;
-        return `${name.first} ${name.last}`;
+        return `${student.name.first} ${student.name.last}`;
     };
 
     const getPreferredName = (student) => {
@@ -135,13 +135,13 @@ const StudentIntroductions = () => {
 
     // Function to get full image URL
     const getImageUrl = (student) => {
-        if (student.image) {
+        if (student.media?.src) {
             // Check if it's already a full URL
-            if (student.image.startsWith('http')) {
-                return student.image;
+            if (student.media.src.startsWith('http')) {
+                return student.media.src;
             }
             // Prepend the base URL to the relative path
-            return `https://dvonb.xyz${student.image}`;
+            return `https://dvonb.xyz${student.media.src}`;
         }
         return null;
     };
@@ -155,8 +155,9 @@ const StudentIntroductions = () => {
 
     // Function to handle image loading errors
     const handleImageError = (e) => {
+        console.log('Image failed to load:', e.target.src);
         e.target.style.display = 'none';
-        const initialsContainer = e.target.nextSibling;
+        const initialsContainer = e.target.parentElement.querySelector('.student-initials');
         if (initialsContainer) {
             initialsContainer.style.display = 'flex';
         }
@@ -200,6 +201,7 @@ const StudentIntroductions = () => {
 
     const currentStudent = filteredStudents[currentStudentIndex];
     const imageUrl = getImageUrl(currentStudent);
+    const hasImage = currentStudent.media?.hasImage === true && imageUrl;
 
     return (
         <div className="student-introductions">
@@ -259,7 +261,7 @@ const StudentIntroductions = () => {
                         <div className="student-card slideshow-item">
                             <div className="student-header">
                                 {/* Image Section */}
-                                {filters.image && imageUrl && (
+                                {filters.image && hasImage && (
                                     <div className="student-image-container">
                                         <img
                                             src={imageUrl}
@@ -270,6 +272,9 @@ const StudentIntroductions = () => {
                                         <div className="student-initials">
                                             {getInitials(currentStudent)}
                                         </div>
+                                        {currentStudent.media?.caption && (
+                                            <p className="image-caption">{currentStudent.media.caption}</p>
+                                        )}
                                     </div>
                                 )}
                                 
@@ -289,7 +294,6 @@ const StudentIntroductions = () => {
                                         </div>
                                     )}
                                     
-                                    {/* Email always shown */}
                                     <p className="student-email">
                                         <strong>Email:</strong> {currentStudent.prefix}@charlotte.edu
                                     </p>
@@ -297,7 +301,7 @@ const StudentIntroductions = () => {
                             </div>
 
                             <div className="student-details">
-                                {/* Contact Information - Links only, email moved to header */}
+                                {/* Contact Information */}
                                 {currentStudent.links?.charlotte && (
                                     <div className="detail-group">
                                         <h4>Website</h4>
@@ -388,7 +392,6 @@ const StudentIntroductions = () => {
                                     <h4>Links</h4>
                                     <div className="links-grid">
                                         {Object.entries(currentStudent.links).map(([key, value]) => {
-                                            // Skip charlotte link since it's shown above
                                             if (key === 'charlotte') return null;
                                             return (
                                                 <a
